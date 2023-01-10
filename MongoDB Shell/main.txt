@@ -1,0 +1,199 @@
+//tweeter is the name of the database
+use TWEETER
+
+//All users with above 5000 followers
+db.USER.find({followers: {$gt:5000}}, {_id: 1})
+
+//All replies from one user that were updated at least once
+db.REPLY.find({
+	$and: [
+		{user_id: ObjectId('05ab85c0d3fd637187db7ffe')},
+		{date_updated: {$ne: null}}
+	]
+})
+
+//All of a user's followers
+db.FOLLOWER.find(
+	{
+		user_id: ObjectId('05ab85c0d3fd637187db7ffe')
+	},
+	{
+		follower_id: 1,
+		_id: 0
+	}
+)
+
+//All users with less than 7500 followers with more than 5000 favorites for users created from current date to 2020-12-10
+db.USER.find(
+	{
+		$and: 
+		[
+			{
+				followers: {$lt: 7500}
+			}, 
+			{
+				favorites: {$gt: 5000}
+			}, 
+			{
+				created: 
+				{
+					$gt: new Date('2020-12-10'),  
+					$lt: new Date()
+				}
+			}
+		]
+	},
+	{
+		_id: 0,
+		username: 1
+	}
+)
+
+//All tweets from last 5 years for one person
+db.TWEET.find(
+	{
+		$and: 
+		[
+			{
+				user_id: ObjectId('05ab85c0d3fd637187db7ffe')
+			}, 
+			{
+				creation_date: 
+				{
+					$gt: new Date('2017-12-10'),  
+					$lt: new Date()
+				}
+			}
+		]
+	}
+)
+
+//Which user has the most amount of tweets
+db.TWEET.aggregate([
+  {"$sortByCount": "$user_id"},
+  {"$limit":1}
+])
+
+//Top 10 tweets with the most replies
+db.TWEET.aggregate([
+    {
+        $project : { replies_count: {$size: { "$ifNull": [ "$replies", [] ]}}}
+    }, 
+    {
+		$sort: {"replies_count": -1}
+	},
+	{
+		$limit: 10
+	}
+])
+
+//All Tweets with 5 or more than favorites
+db.TWEET.aggregate([
+    {
+        $project : { favorites_count: {$size: { "$ifNull": [ "$favorites", [] ]}}}
+    }, 
+	{
+		$match : { favorites_count : { $gte: 5 } }
+	}
+])
+
+
+
+
+
+
+
+//UPDATING DOCUMENTS and FUNCTIONS
+
+//increment follower count by 1 on USER collection
+db.USER.updateOne(
+	{
+		_id: ObjectId("3555fb5e0178207fd9d87dcf")
+	},
+	{
+		$inc: { followers: -10000}
+	}
+)
+
+//update then move a document meant for deletion to the trashcan and add
+var curId = ObjectId("011c50a824b47a5254ae6667");
+db.TRASHCAN.insertOne(
+	db.TWEET.aggregate(
+	[ 
+		{
+			$match :
+			{
+				_id: curId
+			}
+		},
+		{
+			$addFields: 
+			{ 
+				_id : ObjectId(),
+				personnel: 'admin1',  
+				deletion_date: new Date(),
+				old_id: curId
+			}
+		}
+	])
+)
+db.TWEET.deleteOne({_id: curId})
+
+
+//given the id of a user increase the follower count by one
+var curId = ObjectId("3555fb5e0178207fd9d87dcf");
+db.USER.updateOne(
+	{
+		_id: curId
+	},
+	{
+		$inc: { followers: 1}
+	}
+)
+
+//given the id of a user increase the following count by one
+var curId = ObjectId("3555fb5e0178207fd9d87dcf");
+db.USER.updateOne(
+	{
+		_id: curId
+	},
+	{
+		$inc: { following: 1}
+	}
+)
+
+//deletes any document in TRASHCAN with a deletion date of over 30 days ago or older.
+//find to show first
+db.TRASHCAN.find(
+	{
+		deletion_date: 
+		{
+			$lte: new Date(ISODate().getTime() - 1000 * 86400 * 30)
+		}
+	}
+)
+//delete
+db.TRASHCAN.deleteMany(
+	{
+		deletion_date: 
+		{
+			$lte: new Date(ISODate().getTime() - 1000 * 86400 * 30)
+		}
+	}
+)
+
+
+
+
+
+
+
+//TRIGGERS
+
+//***Didn't get around to doing triggers in this portion but here is what i would've done***
+
+//when someone follows someone else: insertion into  FOLLOWER put into function the id of user who needs followers increased and vice versa for the following
+
+
+
+//every morning at 12:01 AM run function that deletes old trashcan for documents older than 30 days

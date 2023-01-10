@@ -1,0 +1,254 @@
+//tweeter is the name of the database
+use TWEETER
+
+//add a trash can collection to let all documents that are deleted from other collections over 30 days be deleted
+db.createCollection("TRASHCAN", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['personnel', 'deletion_date', 'old_id'],
+			properties: {
+				personnel: {
+					bsonType: ['string'],
+				},
+				deletion_date: {
+					bsonType: ['date'],
+				},
+				old_id: {
+					bsonType: ['objectId'],
+				},
+			},
+		},
+	},
+})
+
+//create USER with validations
+db.createCollection("USER", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['username', 'first_name', 'last_name', 'email', 'password', 'favorites', 'followers', 'following', 'created'],
+		  properties: {
+				username: {
+					bsonType: ['string'],
+				},
+				first_name: {
+					bsonType: ['string'],
+				},
+				last_name: {
+					bsonType: ['string'],
+				},
+				email: {
+					bsonType: ['string'],
+				},
+				password: {
+					bsonType: ['string'],
+				},
+				favorites: {
+					bsonType: ['int'],
+				},
+				followers: {
+					bsonType: ['int'],
+				},
+				following: {
+					bsonType: ['int'],
+				},
+				created: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create TAG
+db.createCollection("TAG", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['name', 'tweets', 'creation_date'],
+			properties: {
+				name: {
+					bsonType: ['string'],
+				},
+				tweets: {
+					bsonType: ['int'],
+				},
+				creation_date: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create TAGGING
+db.createCollection("TAGGING", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['tag_id', 'tweet_id', 'date_tagged'],
+			properties: {
+				tag_id: {
+					bsonType: ['objectId'],
+				},
+				tweet_id: {
+					bsonType: ['objectId'],
+				},
+				date_tagged: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create RETWEET
+db.createCollection("RETWEET", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['tweet_id', 'retweet_id'],
+			properties: {
+				tweet_id: {
+					bsonType: ['objectId'],
+				},
+				retweet_id: {
+					bsonType: ['objectId'],
+				},
+			},
+		},
+	},
+})
+
+//create FOLLOWER
+db.createCollection("FOLLOWER", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['user_id', 'follower_id', 'date_followed'],
+			properties: {
+				user_id: {
+					bsonType: ['objectId'],
+				},
+				follower_id: {
+					bsonType: ['objectId'],
+				},
+				date_followed: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create FAVORITE
+db.createCollection("FAVORITE", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['tweet_id', 'user_id', 'date_favorited'],
+			properties: {
+				tweet_id: {
+					bsonType: ['objectId'],
+				},
+				user_id: {
+					bsonType: ['objectId'],
+				},
+				date_favorited: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create REPLY
+db.createCollection("REPLY", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['tweet_id', 'user_id', 'reply', 'date_replied', 'date_updated'],
+			properties: {
+				tweet_id: {
+					bsonType: ['objectId'],
+				},
+				user_id: {
+					bsonType: ['objectId'],
+				},
+				reply: {
+					bsonType: ['string'],
+				},
+				date_replied: {
+					bsonType: ['date'],
+				},
+				date_updated: {
+					bsonType: ['date', 'null'],
+				},
+			},
+		},
+	},
+})
+
+//create MENTION
+db.createCollection("MENTION", {
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['tweet_id', 'user_id', 'date_mentioned'],
+			properties: {
+				tweet_id: {
+					bsonType: ['objectId'],
+				},
+				user_id: {
+					bsonType: ['objectId'],
+				},
+				date_mentioned: {
+					bsonType: ['date'],
+				},
+			},
+		},
+	},
+})
+
+//create TWEET
+db.createCollection("TWEET")
+
+//add validation onto TWEET collection
+db.runCommand( { collMod: "TWEET",
+	validator: {
+		$jsonSchema: {
+			bsonType: 'object',
+			required: ['user_id', 'tweet', 'favorites', 'replies', 'retweets', 'mentions', 'tags', 'creation_date', 'edit_date'],
+			properties: {
+				user_id: {
+					bsonType: ['objectId'],
+				},
+				tweet: {
+					bsonType: ['string'],
+				},
+				favorites: {
+					bsonType: ['array'],
+				},
+				replies: {
+					bsonType: ['array'],
+				},
+				retweets: {
+					bsonType: ['array'],
+				},
+				mentions: {
+					bsonType: ['array'],
+				},
+				tags: {
+					bsonType: ['array'],
+				},
+				creation_date: {
+					bsonType: ['date'],
+				},
+				edit_date: {
+					bsonType: ['date', 'null'],
+				},
+			},
+		},
+	},
+})
