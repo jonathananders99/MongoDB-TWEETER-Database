@@ -1,4 +1,4 @@
-### Project Name: *TWEETER* using *MongoDB*
+### Project Name: *TWEETER* Using *MongoDB*
 
 ### Description:
 A database based off of Twitter. Project is split into 3 different portions, each put in the respective order of creation below.
